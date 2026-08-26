@@ -513,6 +513,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    document.title = IS_DEMO_MODE ? '杨老师家教｜正式版功能预览' : '杨老师家教';
+  }, []);
+
+  useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
