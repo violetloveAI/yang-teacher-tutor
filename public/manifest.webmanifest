@@ -1,0 +1,10 @@
+{
+  "name": "杨老师家教",
+  "short_name": "杨老师家教",
+  "description": "私人家教课表、学生档案与教学统计。",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fbfaf7",
+  "theme_color": "#273128",
+  "icons": [{ "src": "./app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
