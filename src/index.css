@@ -611,6 +611,7 @@ input:focus, select:focus, textarea:focus { border-color: color-mix(in srgb, var
 .face-id-button { min-width: 240px; min-height: 56px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 18px; border: 0; border-radius: 17px; background: var(--ink); color: var(--surface); cursor: pointer; font-size: 13px; font-weight: 780; }
 .face-id-button:disabled { opacity: .62; }
 .app-lock > small { color: var(--muted); font-size: 9px; }
+.app-lock .app-lock-error { max-width: 320px; margin: -12px auto 0; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--danger) 32%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--danger) 8%, var(--card)); color: var(--danger); font-size: 10px; line-height: 1.5; }
 
 @media (min-width: 901px) {
   .sheet-layer { padding-left: calc(35vw + 24px); }

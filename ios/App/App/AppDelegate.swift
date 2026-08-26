@@ -1,5 +1,68 @@
 import UIKit
 import Capacitor
+import LocalAuthentication
+
+@objc(BiometricAuthPlugin)
+class BiometricAuthPlugin: CAPPlugin, CAPBridgedPlugin {
+    let identifier = "BiometricAuthPlugin"
+    let jsName = "BiometricAuth"
+    let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "checkAvailability", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "authenticate", returnType: CAPPluginReturnPromise)
+    ]
+
+    private func biometryName(_ context: LAContext) -> String {
+        switch context.biometryType {
+        case .faceID: return "faceId"
+        case .touchID: return "touchId"
+        default: return "none"
+        }
+    }
+
+    @objc func checkAvailability(_ call: CAPPluginCall) {
+        let context = LAContext()
+        var error: NSError?
+        let available = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        call.resolve([
+            "available": available,
+            "biometryType": biometryName(context)
+        ])
+    }
+
+    @objc func authenticate(_ call: CAPPluginCall) {
+        let context = LAContext()
+        context.localizedCancelTitle = "取消"
+        context.localizedFallbackTitle = "使用设备密码"
+
+        var evaluationError: NSError?
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &evaluationError) else {
+            call.reject("这台 iPhone 尚未设置 Face ID 或设备密码，请先在系统设置中完成设置。", "AUTH_UNAVAILABLE", evaluationError)
+            return
+        }
+
+        let reason = call.getString("reason") ?? "解锁杨老师家教"
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    call.resolve(["success": true, "biometryType": self.biometryName(context)])
+                    return
+                }
+
+                if let authError = error as? LAError, authError.code == .userCancel || authError.code == .systemCancel || authError.code == .appCancel {
+                    call.reject("验证已取消。", "AUTH_CANCELLED", error)
+                    return
+                }
+                call.reject("Face ID 验证失败，请重试或使用设备密码。", "AUTH_FAILED", error)
+            }
+        }
+    }
+}
+
+class AppBridgeViewController: CAPBridgeViewController {
+    override func capacitorDidLoad() {
+        bridge?.registerPluginInstance(BiometricAuthPlugin())
+    }
+}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

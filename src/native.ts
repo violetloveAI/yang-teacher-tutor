@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { LocalNotifications, type LocalNotificationSchema } from '@capacitor/local-notifications';
 import { Share } from '@capacitor/share';
@@ -6,6 +6,15 @@ import { Share } from '@capacitor/share';
 type NotificationLesson = { id: string; studentId: string; date: string; startTime: string; subject: string; status: string };
 type NotificationStudent = { id: string; name: string; nickname: string; commuteMinutes?: number; locationShort?: string };
 type NotificationSettings = { lessonReminderMinutes: number; departureBufferMinutes: number; notificationsEnabled: boolean };
+type BiometryType = 'faceId' | 'touchId' | 'none';
+type BiometryStatus = { available: boolean; biometryType: BiometryType };
+
+interface BiometricAuthPlugin {
+  checkAvailability(): Promise<BiometryStatus>;
+  authenticate(options: { reason: string }): Promise<{ success: boolean; biometryType: BiometryType }>;
+}
+
+const BiometricAuth = registerPlugin<BiometricAuthPlugin>('BiometricAuth');
 
 function notificationId(value: string) {
   let hash = 17;
@@ -14,6 +23,16 @@ function notificationId(value: string) {
 }
 export function isNativeApp() {
   return Capacitor.isNativePlatform();
+}
+
+export async function checkBiometryAvailability(): Promise<BiometryStatus> {
+  if (!isNativeApp()) return { available: false, biometryType: 'none' };
+  return BiometricAuth.checkAvailability();
+}
+
+export async function authenticateAppLock() {
+  if (!isNativeApp()) return { success: true, biometryType: 'none' as BiometryType };
+  return BiometricAuth.authenticate({ reason: '解锁课程、学生档案和老师私密备注' });
 }
 
 export async function saveAndShareBackup(filename: string, contents: string) {

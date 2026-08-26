@@ -11,7 +11,7 @@ import {
   Repeat2, Search, Settings2, ShieldCheck, Smartphone, Sun, Trash2, Upload, Users, X,
 } from 'lucide-react';
 import { decryptBackup, encryptBackup, type EncryptedBackup } from './backup';
-import { saveAndShareBackup, syncLocalNotifications } from './native';
+import { authenticateAppLock, saveAndShareBackup, syncLocalNotifications } from './native';
 import { callPhone, openAppleMaps } from './platform';
 
 type Subject = '语文' | '数学' | '英语';
@@ -144,7 +144,7 @@ const ARCHIVE_PIN_KEY = 'yang-teacher-tutor-archive-pin';
 const currentLocalDate = localDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
 const demoToday = IS_DEMO_MODE ? '2026-08-26' : currentLocalDate;
 const defaultSettings: AppSettings = {
-  faceIdEnabled: true,
+  faceIdEnabled: false,
   autoLockMinutes: 5,
   lessonReminderMinutes: 60,
   departureBufferMinutes: 15,
@@ -450,6 +450,8 @@ export default function Home() {
   const periodScrollTimerRef = useRef<number | null>(null);
   const incomeValueRef = useRef<HTMLElement>(null);
   const previousIncomeRef = useRef(0);
+  const backgroundedAtRef = useRef<number | null>(null);
+  const initialAppLockAppliedRef = useRef(false);
   const [students, setStudents] = useState<Student[]>(() => IS_DEMO_MODE ? initialStudents : []);
   const [lessons, setLessons] = useState<Lesson[]>(() => IS_DEMO_MODE ? initialLessons : []);
   const [scheduleEntries, setScheduleEntries] = useState<ScheduleEntry[]>(() => IS_DEMO_MODE ? initialScheduleEntries : []);
@@ -524,6 +526,28 @@ export default function Home() {
   useEffect(() => {
     if (ready) localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, students, lessons, scheduleEntries, settings } satisfies AppData));
   }, [students, lessons, scheduleEntries, settings, ready]);
+
+  useEffect(() => {
+    if (!ready || IS_DEMO_MODE || initialAppLockAppliedRef.current) return;
+    initialAppLockAppliedRef.current = true;
+    if (settings.faceIdEnabled) setAppLocked(true);
+  }, [ready, settings.faceIdEnabled]);
+
+  useEffect(() => {
+    if (!ready || IS_DEMO_MODE) return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        backgroundedAtRef.current = Date.now();
+        return;
+      }
+      if (!settings.faceIdEnabled || backgroundedAtRef.current === null) return;
+      const elapsed = Date.now() - backgroundedAtRef.current;
+      if (elapsed >= settings.autoLockMinutes * 60_000) setAppLocked(true);
+      backgroundedAtRef.current = null;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [ready, settings.faceIdEnabled, settings.autoLockMinutes]);
 
   useEffect(() => {
     const mm = gsap.matchMedia();
@@ -808,6 +832,20 @@ export default function Home() {
     showToast(result.scheduled ? `已同步 ${result.scheduled} 条本地提醒` : '已清除本地提醒');
   }
 
+  async function setFaceIdProtection(enabled: boolean) {
+    if (!enabled) {
+      setSettings((current) => ({ ...current, faceIdEnabled: false }));
+      showToast('Face ID 全应用锁已关闭');
+      return;
+    }
+    if (!IS_DEMO_MODE) {
+      const result = await authenticateAppLock();
+      if (!result.success) throw new Error('未能完成系统身份验证。');
+    }
+    setSettings((current) => ({ ...current, faceIdEnabled: true }));
+    showToast(IS_DEMO_MODE ? '演示版 Face ID 流程已开启' : 'Face ID 全应用锁已开启');
+  }
+
   const monthLessons = calendarLessons.filter((lesson) => lesson.date.startsWith(`${monthCursor.getFullYear()}-${String(monthCursor.getMonth() + 1).padStart(2, '0')}`));
   const monthScheduleEntries = visibleScheduleEntries.filter((entry) => entry.date.startsWith(`${monthCursor.getFullYear()}-${String(monthCursor.getMonth() + 1).padStart(2, '0')}`));
   const activeFilterCount = selectedStudentIds.length + selectedSubjects.length + (showScheduleEntries ? 0 : 1);
@@ -1000,6 +1038,7 @@ export default function Home() {
             students={students}
             lessons={lessons}
             scheduleEntries={scheduleEntries}
+            onFaceIdChange={setFaceIdProtection}
             onExport={exportEncryptedBackup}
             onImport={importEncryptedBackup}
             onSyncNotifications={syncNotifications}
@@ -1025,12 +1064,13 @@ export default function Home() {
   );
 }
 
-function SettingsView({ settings, onSettingsChange, students, lessons, scheduleEntries, onExport, onImport, onSyncNotifications, onLock }: {
+function SettingsView({ settings, onSettingsChange, students, lessons, scheduleEntries, onFaceIdChange, onExport, onImport, onSyncNotifications, onLock }: {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
   students: Student[];
   lessons: Lesson[];
   scheduleEntries: ScheduleEntry[];
+  onFaceIdChange: (enabled: boolean) => Promise<void>;
   onExport: (password: string) => Promise<void>;
   onImport: (file: File, password: string) => Promise<void>;
   onSyncNotifications: () => Promise<void>;
@@ -1042,6 +1082,8 @@ function SettingsView({ settings, onSettingsChange, students, lessons, scheduleE
   const [backupError, setBackupError] = useState('');
   const [notificationBusy, setNotificationBusy] = useState(false);
   const [notificationError, setNotificationError] = useState('');
+  const [faceIdBusy, setFaceIdBusy] = useState(false);
+  const [faceIdError, setFaceIdError] = useState('');
   const upcoming = lessons
     .filter((lesson) => lesson.status === '已预约' && lesson.date >= demoToday)
     .sort((a, b) => `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`))
@@ -1072,12 +1114,13 @@ function SettingsView({ settings, onSettingsChange, students, lessons, scheduleE
     </section>
 
     <section className="settings-card">
-      <div className="settings-card-heading"><div><Fingerprint size={19} aria-hidden="true" /></div><div><h3>隐私与解锁</h3><p>正式 iPhone 版将调用系统 Face ID。</p></div></div>
-      <button type="button" className="setting-row" onClick={() => onSettingsChange({ ...settings, faceIdEnabled: !settings.faceIdEnabled })} aria-pressed={settings.faceIdEnabled}>
-        <span><strong>Face ID 全应用锁</strong><small>打开应用时保护所有学生资料</small></span><i className={`setting-toggle ${settings.faceIdEnabled ? 'enabled' : ''}`} aria-hidden="true"><b /></i>
+      <div className="settings-card-heading"><div><Fingerprint size={19} aria-hidden="true" /></div><div><h3>隐私与解锁</h3><p>{IS_DEMO_MODE ? '网页预览模拟系统 Face ID 流程。' : '使用系统 Face ID，并保留设备密码兜底。'}</p></div></div>
+      <button type="button" className="setting-row" disabled={faceIdBusy} onClick={async () => { setFaceIdError(''); setFaceIdBusy(true); try { await onFaceIdChange(!settings.faceIdEnabled); } catch (error) { setFaceIdError(error instanceof Error ? error.message : 'Face ID 设置失败。'); } finally { setFaceIdBusy(false); } }} aria-pressed={settings.faceIdEnabled}>
+        <span><strong>Face ID 全应用锁</strong><small>{faceIdBusy ? '正在验证身份…' : '开启后保护全部课程和学生资料'}</small></span><i className={`setting-toggle ${settings.faceIdEnabled ? 'enabled' : ''}`} aria-hidden="true"><b /></i>
       </button>
+      {faceIdError && <p className="backup-error" role="alert">{faceIdError}</p>}
       <label className="setting-select-row"><span><strong>离开后自动锁定</strong><small>返回应用时重新验证</small></span><select value={settings.autoLockMinutes} onChange={(event) => onSettingsChange({ ...settings, autoLockMinutes: Number(event.target.value) })}><option value={0}>立即</option><option value={1}>1 分钟</option><option value={5}>5 分钟</option><option value={15}>15 分钟</option></select></label>
-      <button type="button" className="settings-secondary-action" onClick={onLock}><LockKeyhole size={16} aria-hidden="true" />立即锁定测试</button>
+      <button type="button" className="settings-secondary-action" onClick={onLock} disabled={!settings.faceIdEnabled}><LockKeyhole size={16} aria-hidden="true" />{settings.faceIdEnabled ? '立即锁定测试' : '开启 Face ID 后可测试'}</button>
       {IS_DEMO_MODE && <p className="settings-footnote"><Info size={14} aria-hidden="true" />网页演示仅模拟 Face ID 流程，不会访问面容信息。</p>}
     </section>
 
@@ -1119,15 +1162,30 @@ function SettingsView({ settings, onSettingsChange, students, lessons, scheduleE
 
 function AppLock({ onUnlock }: { onUnlock: () => void }) {
   const [checking, setChecking] = useState(false);
-  function unlock() {
+  const [error, setError] = useState('');
+  async function unlock() {
+    setError('');
     setChecking(true);
-    window.setTimeout(() => { setChecking(false); onUnlock(); }, 620);
+    if (IS_DEMO_MODE) {
+      window.setTimeout(() => { setChecking(false); onUnlock(); }, 620);
+      return;
+    }
+    try {
+      const result = await authenticateAppLock();
+      if (result.success) onUnlock();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : '验证未完成，请重试。');
+    } finally {
+      setChecking(false);
+    }
   }
   return <div className="app-lock" role="dialog" aria-modal="true" aria-labelledby="app-lock-title">
     <div className="app-lock-mark">杨</div>
     <div><p className="eyebrow">Private workspace</p><h2 id="app-lock-title">杨老师家教已锁定</h2><p>课程、学生资料和私密备注均已隐藏。</p></div>
-    <button type="button" className="face-id-button" onClick={unlock} disabled={checking}><Fingerprint size={24} aria-hidden="true" />{checking ? '正在验证…' : IS_DEMO_MODE ? '模拟 Face ID 解锁' : '使用 Face ID 解锁'}</button>
+    <button type="button" className="face-id-button" onClick={unlock} disabled={checking} autoFocus><Fingerprint size={24} aria-hidden="true" />{checking ? '正在验证…' : IS_DEMO_MODE ? '模拟 Face ID 解锁' : '使用 Face ID 解锁'}</button>
+    {error && <p className="app-lock-error" role="alert">{error}</p>}
     {IS_DEMO_MODE && <small>此页只演示正式版解锁交互。</small>}
+    {!IS_DEMO_MODE && <small>多次识别失败时，可按系统提示使用设备密码。</small>}
   </div>;
 }
 
