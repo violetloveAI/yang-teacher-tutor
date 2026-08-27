@@ -1,6 +1,6 @@
 {
-  "name": "杨老师家教",
-  "short_name": "杨老师家教",
+  "name": "家教计薪器",
+  "short_name": "家教计薪器",
   "description": "私人家教课表、学生档案与教学统计。",
   "start_url": "./",
   "display": "standalone",

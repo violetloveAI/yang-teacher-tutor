@@ -45,7 +45,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "杨老师家教"
+        label.text = "家教计薪器"
         label.font = .systemFont(ofSize: 17, weight: .semibold)
         label.textColor = .label
 

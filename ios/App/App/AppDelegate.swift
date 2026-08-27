@@ -40,7 +40,7 @@ class BiometricAuthPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
-        let reason = call.getString("reason") ?? "解锁杨老师家教"
+        let reason = call.getString("reason") ?? "解锁家教计薪器"
         context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
             DispatchQueue.main.async {
                 if success {

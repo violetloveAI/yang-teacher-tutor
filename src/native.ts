@@ -38,7 +38,7 @@ export async function authenticateAppLock() {
 export async function saveAndShareBackup(filename: string, contents: string) {
   if (!isNativeApp()) return false;
   const result = await Filesystem.writeFile({ path: filename, data: contents, directory: Directory.Documents, encoding: Encoding.UTF8, recursive: true });
-  await Share.share({ title: '杨老师家教加密备份', text: '请将这份备份保存到安全位置。', url: result.uri, dialogTitle: '保存加密备份' });
+  await Share.share({ title: '家教计薪器加密备份', text: '请将这份备份保存到安全位置。', url: result.uri, dialogTitle: '保存加密备份' });
   return true;
 }
 

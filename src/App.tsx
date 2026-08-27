@@ -49,6 +49,8 @@ type Student = {
   parentName: string; parentPhone: string; subjects: Subject[];
   defaultDuration: number; defaultFee: number; notes: string;
   locationShort?: string; fullAddress?: string; commuteMinutes?: number; color?: string;
+  defaultHourlyRate?: number; commuteCost?: number; preparationMinutes?: number; wrapUpMinutes?: number;
+  defaultStartTime?: string; defaultEndTime?: string; defaultWeekdays?: number[]; autoScheduleEnabled?: boolean;
   teacherEvaluation?: string; parentEvaluation?: string; archiveNotes?: string;
   tutoringStatus?: TutoringStatus; tutoringStartDate?: string; tutoringEndDate?: string;
 };
@@ -59,6 +61,7 @@ type Lesson = {
   mastery: Mastery; masteryNotes: string; performance: string; homework: string;
   nextPlan: string; privateNotes: string; fee: number; payment: Payment; photos: string[];
   masteredWhat?: string; needsPracticeWhat?: string; notMasteredWhat?: string;
+  commuteMinutes?: number; commuteCost?: number; preparationMinutes?: number; wrapUpMinutes?: number;
   scheduleMode?: ScheduleMode; repeatStart?: string; repeatEnd?: string;
   repeatWeekdays?: number[]; seriesId?: string;
 };
@@ -73,12 +76,12 @@ type ScheduleEntry = {
 const studentColorPalette = ['#7b6ba8', '#5f7f65', '#b16f4f', '#397c8f', '#a05c75', '#8a713e', '#526fa3', '#7b715f'];
 
 const initialStudents: Student[] = [
-  { id: 'mia', name: '林知夏', nickname: 'Mia', grade: '五年级', school: '启明小学', parentName: '林女士', parentPhone: '演示号码', subjects: ['数学', '英语'], defaultDuration: 90, defaultFee: 300, notes: '应用题读题时容易漏条件。', locationShort: '徐家汇', fullAddress: '演示地址：徐汇区某小区', commuteMinutes: 35, color: studentColorPalette[0], teacherEvaluation: '理解速度快，遇到综合题容易急，需要练习把条件逐条圈出。', parentEvaluation: '沟通及时，比较关注学习方法。', archiveNotes: '阶段目标：开学前把分数应用题正确率稳定到 85%。', tutoringStatus: 'active', tutoringStartDate: '2026-07-01', tutoringEndDate: '' },
-  { id: 'leo', name: '周予安', nickname: 'Leo', grade: '四年级', school: '实验小学', parentName: '周先生', parentPhone: '演示号码', subjects: ['语文', '英语'], defaultDuration: 60, defaultFee: 220, notes: '口语表达积极，书写需要更细心。', locationShort: '浦东', fullAddress: '演示地址：浦东新区某小区', commuteMinutes: 50, color: studentColorPalette[1], teacherEvaluation: '口语参与度高，单词拼写需要建立错词本。', parentEvaluation: '更偏结果导向，需要每两周同步一次进展。', archiveNotes: '适合短任务、快反馈的课堂节奏。', tutoringStatus: 'active', tutoringStartDate: '2026-06-01', tutoringEndDate: '' },
-  { id: 'emma', name: '陈嘉禾', nickname: 'Emma', grade: '六年级', school: '文澜小学', parentName: '陈女士', parentPhone: '演示号码', subjects: ['语文', '数学'], defaultDuration: 90, defaultFee: 280, notes: '小升初阶段课程已完成，保留历史记录。', locationShort: '杨浦', fullAddress: '演示地址：杨浦区某小区', commuteMinutes: 42, color: studentColorPalette[2], teacherEvaluation: '思路完整，表达有条理，作文素材积累不足。', parentEvaluation: '配合度高，会主动确认作业完成情况。', archiveNotes: '阶段课程已经完成，可在新学期按需重新开启。', tutoringStatus: 'ended', tutoringStartDate: '2026-05-15', tutoringEndDate: '2026-08-23' },
-  { id: 'nora', name: '沈星遥', nickname: 'Nora', grade: '三年级', school: '汇师小学', parentName: '沈女士', parentPhone: '演示号码', subjects: ['语文', '英语'], defaultDuration: 60, defaultFee: 240, notes: '阅读兴趣浓，朗读很有表现力。', locationShort: '静安寺', fullAddress: '演示地址：静安区某小区', commuteMinutes: 28, color: studentColorPalette[3], teacherEvaluation: '表达欲强，注意把答案写完整。', parentEvaluation: '沟通细致，时间安排稳定。', archiveNotes: '可多安排故事复述与看图写话。', tutoringStatus: 'active', tutoringStartDate: '2026-08-01', tutoringEndDate: '2026-10-31' },
-  { id: 'felix', name: '顾明川', nickname: 'Felix', grade: '初一', school: '市西初级中学', parentName: '顾先生', parentPhone: '演示号码', subjects: ['数学', '英语'], defaultDuration: 120, defaultFee: 420, notes: '基础不错，需要适应初中题量。', locationShort: '中山公园', fullAddress: '演示地址：长宁区某小区', commuteMinutes: 32, color: studentColorPalette[4], teacherEvaluation: '推理能力好，但步骤书写过于跳跃。', parentEvaluation: '尊重课堂节奏，希望每月收到一次复盘。', archiveNotes: '开学第一个月重点观察作业量和适应情况。', tutoringStatus: 'active', tutoringStartDate: '2026-07-20', tutoringEndDate: '' },
-  { id: 'yoyo', name: '唐语桐', nickname: 'Yoyo', grade: '二年级', school: '明珠小学', parentName: '唐女士', parentPhone: '演示号码', subjects: ['语文', '数学'], defaultDuration: 60, defaultFee: 200, notes: '低年级，以兴趣和习惯培养为主。', locationShort: '世纪公园', fullAddress: '演示地址：浦东新区某小区', commuteMinutes: 46, color: studentColorPalette[5], teacherEvaluation: '专注约 25 分钟，适合穿插卡片游戏。', parentEvaluation: '配合准备教具，反馈温和。', archiveNotes: '避免一次布置过多书面作业。', tutoringStatus: 'active', tutoringStartDate: '2026-07-15', tutoringEndDate: '' },
+  { id: 'mia', name: '林知夏', nickname: 'Mia', grade: '五年级', school: '启明小学', parentName: '林女士', parentPhone: '演示号码', subjects: ['数学', '英语'], defaultDuration: 90, defaultFee: 300, defaultHourlyRate: 200, defaultStartTime: '16:00', defaultEndTime: '17:30', defaultWeekdays: [3, 6], autoScheduleEnabled: true, preparationMinutes: 20, wrapUpMinutes: 10, commuteCost: 12, notes: '应用题读题时容易漏条件。', locationShort: '徐家汇', fullAddress: '演示地址：徐汇区某小区', commuteMinutes: 35, color: studentColorPalette[0], teacherEvaluation: '理解速度快，遇到综合题容易急，需要练习把条件逐条圈出。', parentEvaluation: '沟通及时，比较关注学习方法。', archiveNotes: '阶段目标：开学前把分数应用题正确率稳定到 85%。', tutoringStatus: 'active', tutoringStartDate: '2026-07-01', tutoringEndDate: '' },
+  { id: 'leo', name: '周予安', nickname: 'Leo', grade: '四年级', school: '实验小学', parentName: '周先生', parentPhone: '演示号码', subjects: ['语文', '英语'], defaultDuration: 60, defaultFee: 220, defaultHourlyRate: 220, defaultStartTime: '19:00', defaultEndTime: '20:00', defaultWeekdays: [2], autoScheduleEnabled: true, preparationMinutes: 15, wrapUpMinutes: 10, commuteCost: 18, notes: '口语表达积极，书写需要更细心。', locationShort: '浦东', fullAddress: '演示地址：浦东新区某小区', commuteMinutes: 50, color: studentColorPalette[1], teacherEvaluation: '口语参与度高，单词拼写需要建立错词本。', parentEvaluation: '更偏结果导向，需要每两周同步一次进展。', archiveNotes: '适合短任务、快反馈的课堂节奏。', tutoringStatus: 'active', tutoringStartDate: '2026-06-01', tutoringEndDate: '' },
+  { id: 'emma', name: '陈嘉禾', nickname: 'Emma', grade: '六年级', school: '文澜小学', parentName: '陈女士', parentPhone: '演示号码', subjects: ['语文', '数学'], defaultDuration: 90, defaultFee: 280, defaultHourlyRate: 187, defaultStartTime: '18:30', defaultEndTime: '20:00', defaultWeekdays: [5], autoScheduleEnabled: false, preparationMinutes: 25, wrapUpMinutes: 10, commuteCost: 16, notes: '小升初阶段课程已完成，保留历史记录。', locationShort: '杨浦', fullAddress: '演示地址：杨浦区某小区', commuteMinutes: 42, color: studentColorPalette[2], teacherEvaluation: '思路完整，表达有条理，作文素材积累不足。', parentEvaluation: '配合度高，会主动确认作业完成情况。', archiveNotes: '阶段课程已经完成，可在新学期按需重新开启。', tutoringStatus: 'ended', tutoringStartDate: '2026-05-15', tutoringEndDate: '2026-08-23' },
+  { id: 'nora', name: '沈星遥', nickname: 'Nora', grade: '三年级', school: '汇师小学', parentName: '沈女士', parentPhone: '演示号码', subjects: ['语文', '英语'], defaultDuration: 60, defaultFee: 240, defaultHourlyRate: 240, defaultStartTime: '17:00', defaultEndTime: '18:00', defaultWeekdays: [4], autoScheduleEnabled: true, preparationMinutes: 20, wrapUpMinutes: 10, commuteCost: 8, notes: '阅读兴趣浓，朗读很有表现力。', locationShort: '静安寺', fullAddress: '演示地址：静安区某小区', commuteMinutes: 28, color: studentColorPalette[3], teacherEvaluation: '表达欲强，注意把答案写完整。', parentEvaluation: '沟通细致，时间安排稳定。', archiveNotes: '可多安排故事复述与看图写话。', tutoringStatus: 'active', tutoringStartDate: '2026-08-01', tutoringEndDate: '2026-10-31' },
+  { id: 'felix', name: '顾明川', nickname: 'Felix', grade: '初一', school: '市西初级中学', parentName: '顾先生', parentPhone: '演示号码', subjects: ['数学', '英语'], defaultDuration: 120, defaultFee: 420, defaultHourlyRate: 210, defaultStartTime: '18:30', defaultEndTime: '20:30', defaultWeekdays: [1, 5], autoScheduleEnabled: true, preparationMinutes: 30, wrapUpMinutes: 15, commuteCost: 10, notes: '基础不错，需要适应初中题量。', locationShort: '中山公园', fullAddress: '演示地址：长宁区某小区', commuteMinutes: 32, color: studentColorPalette[4], teacherEvaluation: '推理能力好，但步骤书写过于跳跃。', parentEvaluation: '尊重课堂节奏，希望每月收到一次复盘。', archiveNotes: '开学第一个月重点观察作业量和适应情况。', tutoringStatus: 'active', tutoringStartDate: '2026-07-20', tutoringEndDate: '' },
+  { id: 'yoyo', name: '唐语桐', nickname: 'Yoyo', grade: '二年级', school: '明珠小学', parentName: '唐女士', parentPhone: '演示号码', subjects: ['语文', '数学'], defaultDuration: 60, defaultFee: 200, defaultHourlyRate: 200, defaultStartTime: '10:00', defaultEndTime: '11:00', defaultWeekdays: [7], autoScheduleEnabled: true, preparationMinutes: 20, wrapUpMinutes: 10, commuteCost: 20, notes: '低年级，以兴趣和习惯培养为主。', locationShort: '世纪公园', fullAddress: '演示地址：浦东新区某小区', commuteMinutes: 46, color: studentColorPalette[5], teacherEvaluation: '专注约 25 分钟，适合穿插卡片游戏。', parentEvaluation: '配合准备教具，反馈温和。', archiveNotes: '避免一次布置过多书面作业。', tutoringStatus: 'active', tutoringStartDate: '2026-07-15', tutoringEndDate: '' },
 ];
 
 function demoLesson(id: string, studentId: string, date: string, startTime: string, endTime: string, subject: Subject, teachingContent: string, fee: number, options: Partial<Lesson> = {}): Lesson {
@@ -170,11 +173,55 @@ function tutoringStatusLabel(student?: Student) {
   return tutoringStatusFor(student) === 'active' ? '正在授课' : '已结课';
 }
 
-function calculateLessonStats(items: Lesson[]) {
+function lessonCostBreakdown(lesson: Lesson, student?: Student) {
+  const commuteMinutes = Math.max(0, lesson.commuteMinutes ?? student?.commuteMinutes ?? 0);
+  const commuteCost = Math.max(0, lesson.commuteCost ?? student?.commuteCost ?? 0);
+  const preparationMinutes = Math.max(0, lesson.preparationMinutes ?? student?.preparationMinutes ?? 0);
+  const wrapUpMinutes = Math.max(0, lesson.wrapUpMinutes ?? student?.wrapUpMinutes ?? 0);
+  const workMinutes = Math.max(0, lesson.duration) + commuteMinutes * 2 + preparationMinutes + wrapUpMinutes;
+  const netIncome = lesson.fee - commuteCost;
+  return {
+    commuteMinutes,
+    commuteCost,
+    preparationMinutes,
+    wrapUpMinutes,
+    workMinutes,
+    netIncome,
+    effectiveHourly: workMinutes ? netIncome / (workMinutes / 60) : 0,
+  };
+}
+
+function studentHourlyRate(student: Student) {
+  if (Number.isFinite(student.defaultHourlyRate) && Number(student.defaultHourlyRate) >= 0) return Number(student.defaultHourlyRate);
+  return student.defaultDuration ? student.defaultFee / (student.defaultDuration / 60) : 0;
+}
+
+function calculateLessonStats(items: Lesson[], students: Record<string, Student> = {}) {
   const receivable = items.reduce((sum, item) => sum + item.fee, 0);
   const paid = items.filter((item) => item.payment === '已收款').reduce((sum, item) => sum + item.fee, 0);
   const minutes = items.reduce((sum, item) => sum + item.duration, 0);
-  return { receivable, paid, unpaid: receivable - paid, hours: minutes / 60, count: items.length, hourly: minutes ? receivable / (minutes / 60) : 0 };
+  const costs = items.map((item) => lessonCostBreakdown(item, students[item.studentId]));
+  const commuteCost = costs.reduce((sum, item) => sum + item.commuteCost, 0);
+  const workMinutes = costs.reduce((sum, item) => sum + item.workMinutes, 0);
+  const commuteTime = costs.reduce((sum, item) => sum + item.commuteMinutes * 2, 0);
+  const preparationTime = costs.reduce((sum, item) => sum + item.preparationMinutes, 0);
+  const wrapUpTime = costs.reduce((sum, item) => sum + item.wrapUpMinutes, 0);
+  const netIncome = receivable - commuteCost;
+  return {
+    receivable,
+    paid,
+    unpaid: receivable - paid,
+    hours: minutes / 60,
+    count: items.length,
+    hourly: minutes ? receivable / (minutes / 60) : 0,
+    commuteCost,
+    netIncome,
+    workHours: workMinutes / 60,
+    effectiveHourly: workMinutes ? netIncome / (workMinutes / 60) : 0,
+    commuteTime,
+    preparationTime,
+    wrapUpTime,
+  };
 }
 
 function buildStatPeriods(unit: StatUnit): StatPeriod[] {
@@ -342,17 +389,45 @@ function compressPhoto(file: File): Promise<string> {
 }
 
 function emptyLesson(student: Student, date: string): Lesson {
-  const startHour = 16;
-  const endMinutes = startHour * 60 + student.defaultDuration;
+  const startTime = student.defaultStartTime || '16:00';
+  const [startHour, startMinute] = startTime.split(':').map(Number);
+  const endMinutes = startHour * 60 + startMinute + student.defaultDuration;
+  const endTime = student.defaultEndTime || `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`;
+  const duration = durationFromTimes(startTime, endTime, student.defaultDuration);
+  const fee = student.defaultHourlyRate !== undefined ? studentHourlyRate(student) * duration / 60 : student.defaultFee;
   return {
-    id: `lesson-${Date.now()}`, studentId: student.id, date, startTime: '16:00',
-    endTime: `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`,
-    duration: student.defaultDuration, subject: student.subjects[0] || '数学', status: '已预约',
+    id: `lesson-${Date.now()}`, studentId: student.id, date, startTime,
+    endTime, duration, subject: student.subjects[0] || '数学', status: '已预约',
     teachingContent: '', mastery: '需要巩固', masteryNotes: '', performance: '', homework: '',
-    nextPlan: '', privateNotes: '', fee: student.defaultFee, payment: '待收款', photos: [],
+    nextPlan: '', privateNotes: '', fee: Math.round(fee * 100) / 100, payment: '待收款', photos: [],
+    commuteMinutes: student.commuteMinutes || 0, commuteCost: student.commuteCost || 0,
+    preparationMinutes: student.preparationMinutes || 0, wrapUpMinutes: student.wrapUpMinutes || 0,
     masteredWhat: '', needsPracticeWhat: '', notMasteredWhat: '', scheduleMode: 'weekly',
-    repeatStart: date, repeatEnd: dateFrom(new Date(`${date}T12:00:00`), 28), repeatWeekdays: [weekdayNumber(date)],
+    repeatStart: date, repeatEnd: dateFrom(new Date(`${date}T12:00:00`), 28), repeatWeekdays: student.defaultWeekdays?.length ? student.defaultWeekdays : [weekdayNumber(date)],
   };
+}
+
+function studentScheduleSeriesId(studentId: string) {
+  return `student-default-${studentId}`;
+}
+
+function scheduledLessonsForStudent(student: Student) {
+  if (!student.autoScheduleEnabled || tutoringStatusFor(student) === 'ended') return [];
+  const start = [student.tutoringStartDate || demoToday, demoToday].sort().at(-1) || demoToday;
+  const end = student.tutoringEndDate || dateFrom(new Date(`${start}T12:00:00`), 182);
+  const weekdays = student.defaultWeekdays?.length ? student.defaultWeekdays : [weekdayNumber(start)];
+  const base = emptyLesson(student, start);
+  const seriesId = studentScheduleSeriesId(student.id);
+  return recurringDates(start, end, weekdays).map((date) => ({
+    ...base,
+    id: `${seriesId}-${date}`,
+    date,
+    seriesId,
+    scheduleMode: 'weekly' as ScheduleMode,
+    repeatStart: start,
+    repeatEnd: end,
+    repeatWeekdays: weekdays,
+  }));
 }
 
 function emptyScheduleEntry(date: string): ScheduleEntry {
@@ -494,7 +569,18 @@ export default function Home() {
           ...student,
           locationShort: student.locationShort || '',
           fullAddress: student.fullAddress || '',
-          commuteMinutes: student.commuteMinutes || 0,
+          commuteMinutes: student.commuteMinutes ?? initialStudents[index]?.commuteMinutes ?? 0,
+          commuteCost: student.commuteCost ?? (IS_DEMO_MODE ? initialStudents[index]?.commuteCost : 0) ?? 0,
+          preparationMinutes: student.preparationMinutes ?? (IS_DEMO_MODE ? initialStudents[index]?.preparationMinutes : 0) ?? 0,
+          wrapUpMinutes: student.wrapUpMinutes ?? (IS_DEMO_MODE ? initialStudents[index]?.wrapUpMinutes : 0) ?? 0,
+          defaultHourlyRate: student.defaultHourlyRate ?? (student.defaultDuration ? student.defaultFee / (student.defaultDuration / 60) : 0),
+          defaultStartTime: student.defaultStartTime || (IS_DEMO_MODE ? initialStudents[index]?.defaultStartTime : '') || '16:00',
+          defaultEndTime: student.defaultEndTime || (() => {
+            const endMinutes = 16 * 60 + (student.defaultDuration || 90);
+            return `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`;
+          })(),
+          defaultWeekdays: student.defaultWeekdays?.length ? student.defaultWeekdays : (IS_DEMO_MODE ? initialStudents[index]?.defaultWeekdays : []) || [],
+          autoScheduleEnabled: student.autoScheduleEnabled || false,
           color: student.color || studentColorPalette[index % studentColorPalette.length],
           tutoringStatus: student.tutoringStatus || 'active',
           tutoringStartDate: student.tutoringStartDate || '',
@@ -502,6 +588,10 @@ export default function Home() {
         })));
         if (Array.isArray(parsed.lessons)) setLessons(parsed.lessons.map((lesson) => ({
           ...lesson,
+          commuteMinutes: lesson.commuteMinutes,
+          commuteCost: lesson.commuteCost,
+          preparationMinutes: lesson.preparationMinutes,
+          wrapUpMinutes: lesson.wrapUpMinutes,
           masteredWhat: legacyMasteryText(lesson, '已掌握'),
           needsPracticeWhat: legacyMasteryText(lesson, '需要巩固'),
           notMasteredWhat: legacyMasteryText(lesson, '未掌握'),
@@ -515,7 +605,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    document.title = IS_DEMO_MODE ? '杨老师家教｜正式版功能预览' : '杨老师家教';
+    document.title = IS_DEMO_MODE ? '家教计薪器｜正式版功能预览' : '家教计薪器';
   }, []);
 
   useEffect(() => {
@@ -613,8 +703,8 @@ export default function Home() {
   const safeStatPeriodIndex = Math.min(activeStatPeriodIndex, Math.max(0, statPeriods.length - 1));
   const activeStatPeriod = statPeriods[safeStatPeriodIndex];
   const periodLessons = useMemo(() => activeStatPeriod ? completedLessons.filter((lesson) => lesson.date >= activeStatPeriod.start && lesson.date <= activeStatPeriod.end) : [], [activeStatPeriod, completedLessons]);
-  const stats = useMemo(() => calculateLessonStats(periodLessons), [periodLessons]);
-  const periodValues = statPeriods.map((period) => calculateLessonStats(completedLessons.filter((lesson) => lesson.date >= period.start && lesson.date <= period.end)).receivable);
+  const stats = useMemo(() => calculateLessonStats(periodLessons, studentMap), [periodLessons, studentMap]);
+  const periodValues = statPeriods.map((period) => calculateLessonStats(completedLessons.filter((lesson) => lesson.date >= period.start && lesson.date <= period.end), studentMap).receivable);
   const maxPeriodValue = Math.max(1, ...periodValues);
   const previousPeriodValue = safeStatPeriodIndex > 0 ? periodValues[safeStatPeriodIndex - 1] : 0;
   const periodChange = previousPeriodValue ? Math.round((stats.receivable - previousPeriodValue) / previousPeriodValue * 100) : stats.receivable ? 100 : 0;
@@ -770,15 +860,43 @@ export default function Home() {
   }
 
   function openNewStudent() {
-    setStudentDraft({ id: `student-${Date.now()}`, name: '', nickname: '', grade: '一年级', school: '', parentName: '', parentPhone: '', subjects: ['数学'], defaultDuration: 90, defaultFee: 300, notes: '', locationShort: '', fullAddress: '', commuteMinutes: 0, color: studentColorPalette[students.length % studentColorPalette.length], tutoringStatus: 'active', tutoringStartDate: demoToday, tutoringEndDate: '' });
+    setStudentDraft({ id: `student-${Date.now()}`, name: '', nickname: '', grade: '一年级', school: '', parentName: '', parentPhone: '', subjects: ['数学'], defaultDuration: 90, defaultFee: 300, defaultHourlyRate: 200, defaultStartTime: '16:00', defaultEndTime: '17:30', defaultWeekdays: [weekdayNumber(demoToday)], autoScheduleEnabled: false, preparationMinutes: 0, wrapUpMinutes: 0, commuteCost: 0, notes: '', locationShort: '', fullAddress: '', commuteMinutes: 0, color: studentColorPalette[students.length % studentColorPalette.length], tutoringStatus: 'active', tutoringStartDate: demoToday, tutoringEndDate: '' });
   }
 
   function saveStudent() {
     if (!studentDraft || !studentDraft.name.trim()) return;
     const normalizedStatus: TutoringStatus = studentDraft.tutoringEndDate && studentDraft.tutoringEndDate < demoToday ? 'ended' : (studentDraft.tutoringStatus || 'active');
-    const nextStudent = { ...studentDraft, tutoringStatus: normalizedStatus };
+    const startTime = studentDraft.defaultStartTime || '16:00';
+    const endTime = studentDraft.defaultEndTime || '17:30';
+    const duration = durationFromTimes(startTime, endTime, studentDraft.defaultDuration || 90);
+    const hourlyRate = Math.max(0, studentHourlyRate(studentDraft));
+    const nextStudent = {
+      ...studentDraft,
+      tutoringStatus: normalizedStatus,
+      defaultStartTime: startTime,
+      defaultEndTime: endTime,
+      defaultDuration: duration,
+      defaultHourlyRate: hourlyRate,
+      defaultFee: Math.round(hourlyRate * duration / 60 * 100) / 100,
+      defaultWeekdays: studentDraft.defaultWeekdays || [],
+    };
     setStudents((items) => items.some((item) => item.id === nextStudent.id) ? items.map((item) => item.id === nextStudent.id ? nextStudent : item) : [...items, nextStudent]);
-    setStudentDraft(null); setSavedToastMessage('学生档案已保存'); setSavedToast(true); window.setTimeout(() => setSavedToast(false), 1800);
+    const seriesId = studentScheduleSeriesId(nextStudent.id);
+    const generated = scheduledLessonsForStudent(nextStudent);
+    setLessons((items) => {
+      const preserved = items.filter((item) => item.seriesId !== seriesId || item.date < demoToday);
+      const keys = new Set(preserved.map((item) => `${item.studentId}|${item.date}|${item.startTime}|${item.subject}`));
+      return [...preserved, ...generated.filter((item) => {
+        const key = `${item.studentId}|${item.date}|${item.startTime}|${item.subject}`;
+        if (keys.has(key)) return false;
+        keys.add(key);
+        return true;
+      })];
+    });
+    setStudentDraft(null);
+    setSavedToastMessage(generated.length ? `学生已保存，课表同步 ${generated.length} 节课` : '学生档案已保存');
+    setSavedToast(true);
+    window.setTimeout(() => setSavedToast(false), 1800);
   }
 
   function switchTab(next: Tab) { setTab(next); setActiveStudentId(null); }
@@ -797,7 +915,7 @@ export default function Home() {
     const data: AppData = { version: 1, students, lessons, scheduleEntries, settings };
     const backup = await encryptBackup(data, password);
     const serialized = JSON.stringify(backup, null, 2);
-    const filename = `杨老师家教备份-${demoToday}.yangtutor`;
+    const filename = `家教计薪器备份-${demoToday}.yangtutor`;
     if (await saveAndShareBackup(filename, serialized)) {
       showToast('加密备份已打开系统分享');
       return;
@@ -862,11 +980,11 @@ export default function Home() {
   return (
     <main className="app-shell" ref={rootRef}>
       <aside className="brand-panel">
-        <div className="brand-row"><div className="brand-mark">杨</div><span>杨老师家教</span></div>
+        <div className="brand-row"><div className="brand-mark">薪</div><span>家教计薪器</span></div>
         <div>
           <p className="eyebrow light">Private teaching journal</p>
           <h1>记录每一次教学，<br />也记录每一点进步。</h1>
-          <p className="brand-copy">为杨老师定制的私人教学工作台。课程、成长和收入，一处清楚记录。</p>
+          <p className="brand-copy">为私人家教定制的课表与计薪工作台。报价、通勤成本和真实时薪，一处清楚记录。</p>
         </div>
         <div className="privacy-note"><LockKeyhole size={14} aria-hidden="true" /> 数据仅保存在本机</div>
       </aside>
@@ -989,7 +1107,7 @@ export default function Home() {
             <div className="range-switcher" role="group" aria-label="统计计量单位" style={{ '--range-index': statUnits.indexOf(statUnit) } as React.CSSProperties}><i className="range-active-indicator" aria-hidden="true" />{statUnits.map((item) => <button key={item} className={statUnit === item ? 'active' : ''} onClick={() => setStatUnit(item)} aria-pressed={statUnit === item}>{item}</button>)}</div>
             <div className="stats-content" ref={statsContentRef} aria-live="polite">
             <section className="income-hero">
-              <div className="income-period-heading"><div><p>{activeStatPeriod?.detail || statUnit}应收</p><strong ref={incomeValueRef}>{cnMoney.format(stats.receivable)}</strong></div><small>{statUnit}视图<br />邻近均值 {cnMoney.format(nearbyAverage)}</small></div>
+              <div className="income-period-heading"><div><p>{activeStatPeriod?.detail || statUnit}报价应收</p><strong ref={incomeValueRef}>{cnMoney.format(stats.receivable)}</strong></div><small>未扣通勤<br />邻近均值 {cnMoney.format(nearbyAverage)}</small></div>
               <span className={`trend ${periodChange < 0 ? 'down' : ''}`}><BarChart3 size={15} />较上一期间 {periodChange >= 0 ? '+' : ''}{periodChange}%</span>
               <div className="period-chart-meta"><span>每根柱代表 1{statUnit} · 左右滑动查看相邻期间</span><div><button type="button" onClick={() => scrollToStatPeriod(safeStatPeriodIndex - 1)} disabled={safeStatPeriodIndex === 0} aria-label={`查看上一个${statUnit}`}><ChevronLeft size={15} aria-hidden="true" /></button><button type="button" onClick={() => scrollToStatPeriod(safeStatPeriodIndex + 1)} disabled={safeStatPeriodIndex === statPeriods.length - 1} aria-label={`查看下一个${statUnit}`}><ChevronRight size={15} aria-hidden="true" /></button></div></div>
               <div className="period-chart-scroll" ref={periodChartScrollRef} onScroll={syncStatPeriodAfterScroll} tabIndex={0} aria-label={`${statUnit}收入时间序列，可左右滑动`}>
@@ -1002,11 +1120,25 @@ export default function Home() {
                 </div>
               </div>
             </section>
-            <div className="metric-grid">
+            <div className="metric-grid four">
               <Metric icon={<BookOpen />} label="完成课程" value={`${stats.count} 节`} />
               <Metric icon={<Clock3 />} label="总课时" value={`${stats.hours.toFixed(1)} h`} />
-              <Metric icon={<CircleDollarSign />} label="平均时薪" value={`${cnMoney.format(stats.hourly)}/h`} />
+              <Metric icon={<CircleDollarSign />} label="课内时薪" value={`${cnMoney.format(stats.hourly)}/h`} />
+              <Metric icon={<Clock3 />} label="真实时薪" value={`${cnMoney.format(stats.effectiveHourly)}/h`} />
             </div>
+            <section className="expense-card">
+              <div className="section-heading compact"><div><p className="eyebrow">Real earnings</p><h3>通勤支出与真实投入</h3><small>{activeStatPeriod?.detail || statUnit} · 报价收入保持原口径</small></div><strong>−{cnMoney.format(stats.commuteCost)}</strong></div>
+              <div className="expense-summary-grid">
+                <div><span>扣除通勤后</span><strong>{cnMoney.format(stats.netIncome)}</strong></div>
+                <div><span>总投入时间</span><strong>{stats.workHours.toFixed(1)} h</strong></div>
+              </div>
+              <div className="time-cost-breakdown" aria-label={`往返通勤${Math.round(stats.commuteTime)}分钟，备课${Math.round(stats.preparationTime)}分钟，善后${Math.round(stats.wrapUpTime)}分钟`}>
+                <span><Navigation size={14} aria-hidden="true" />往返通勤 <strong>{Math.round(stats.commuteTime)} 分钟</strong></span>
+                <span><BookOpen size={14} aria-hidden="true" />备课 <strong>{Math.round(stats.preparationTime)} 分钟</strong></span>
+                <span><Check size={14} aria-hidden="true" />善后 <strong>{Math.round(stats.wrapUpTime)} 分钟</strong></span>
+              </div>
+              <p className="effective-rate-note">真实时薪按“（报价 − 通勤费用）÷ 全部投入时间”计算。</p>
+            </section>
             <section className="payment-card">
               <div className="section-heading compact"><div><p className="eyebrow">Payment</p><h3>收款进度</h3></div><strong>{stats.receivable ? Math.round(stats.paid / stats.receivable * 100) : 0}%</strong></div>
               <div className="progress-track"><i style={{ transform: `scaleX(${stats.receivable ? stats.paid / stats.receivable : 0})` }} /></div>
@@ -1181,7 +1313,7 @@ function AppLock({ onUnlock }: { onUnlock: () => void }) {
   }
   return <div className="app-lock" role="dialog" aria-modal="true" aria-labelledby="app-lock-title">
     <div className="app-lock-mark">杨</div>
-    <div><p className="eyebrow">Private workspace</p><h2 id="app-lock-title">杨老师家教已锁定</h2><p>课程、学生资料和私密备注均已隐藏。</p></div>
+    <div><p className="eyebrow">Private workspace</p><h2 id="app-lock-title">家教计薪器已锁定</h2><p>课程、学生资料和私密备注均已隐藏。</p></div>
     <button type="button" className="face-id-button" onClick={unlock} disabled={checking} autoFocus><Fingerprint size={24} aria-hidden="true" />{checking ? '正在验证…' : IS_DEMO_MODE ? '模拟 Face ID 解锁' : '使用 Face ID 解锁'}</button>
     {error && <p className="app-lock-error" role="alert">{error}</p>}
     {IS_DEMO_MODE && <small>此页只演示正式版解锁交互。</small>}
@@ -1435,6 +1567,7 @@ function LessonEditor({ draft, students, isNew, onChange, onClose, onSave, onDel
   const [scheduleError, setScheduleError] = useState('');
   const isWeekly = draft.scheduleMode === 'weekly';
   const selectedStudent = students.find((student) => student.id === draft.studentId);
+  const costBreakdown = lessonCostBreakdown(draft, selectedStudent);
   const repeatDates = recurringDates(draft.repeatStart || draft.date, draft.repeatEnd || draft.date, draft.repeatWeekdays || []).filter((date) => studentCanAttendOn(selectedStudent, date));
   async function addPhotos(files: FileList | null) {
     if (!files?.length) return;
@@ -1498,13 +1631,31 @@ function LessonEditor({ draft, students, isNew, onChange, onClose, onSave, onDel
             <button type="button" className={!isWeekly ? 'selected' : ''} aria-pressed={!isWeekly} onClick={() => setScheduleMode('single')}><CalendarDays size={16} aria-hidden="true" />单次课程</button>
             <button type="button" className={isWeekly ? 'selected' : ''} aria-pressed={isWeekly} onClick={() => setScheduleMode('weekly')}><Repeat2 size={16} aria-hidden="true" />每周重复</button>
           </div>
-          <label className="lesson-student-field"><FieldLabel required>学生</FieldLabel><select required value={draft.studentId} onChange={(event) => { const student = students.find((item) => item.id === event.target.value); onChange({ ...draft, studentId: event.target.value, fee: student?.defaultFee ?? draft.fee, duration: student?.defaultDuration ?? draft.duration, subject: student?.subjects[0] || draft.subject }); }}>{students.map((student) => <option key={student.id} value={student.id} disabled={isNew && tutoringStatusFor(student) === 'ended'}>{student.nickname || student.name}{tutoringStatusFor(student) === 'ended' ? '（已结课）' : ''}</option>)}</select></label>
+          <label className="lesson-student-field"><FieldLabel required>学生</FieldLabel><select required value={draft.studentId} onChange={(event) => {
+            const student = students.find((item) => item.id === event.target.value);
+            if (!student) return;
+            const next = emptyLesson(student, draft.date);
+            onChange({
+              ...draft,
+              studentId: student.id,
+              fee: next.fee,
+              duration: next.duration,
+              startTime: next.startTime,
+              endTime: next.endTime,
+              subject: student.subjects[0] || draft.subject,
+              commuteMinutes: student.commuteMinutes || 0,
+              commuteCost: student.commuteCost || 0,
+              preparationMinutes: student.preparationMinutes || 0,
+              wrapUpMinutes: student.wrapUpMinutes || 0,
+              repeatWeekdays: student.defaultWeekdays?.length ? student.defaultWeekdays : draft.repeatWeekdays,
+            });
+          }}>{students.map((student) => <option key={student.id} value={student.id} disabled={isNew && tutoringStatusFor(student) === 'ended'}>{student.nickname || student.name}{tutoringStatusFor(student) === 'ended' ? '（已结课）' : ''}</option>)}</select></label>
           <div className="lesson-priority-grid">
             <fieldset className="priority-time-field">
               <legend><FieldLabel required>上课时间</FieldLabel></legend>
               <div><input required aria-label="开始时间" type="time" value={draft.startTime} onChange={(event) => { const startTime = event.target.value; onChange({ ...draft, startTime, duration: durationFromTimes(startTime, draft.endTime, draft.duration) }); }} /><i aria-hidden="true">至</i><input required aria-label="结束时间" type="time" value={draft.endTime} onChange={(event) => { const endTime = event.target.value; onChange({ ...draft, endTime, duration: durationFromTimes(draft.startTime, endTime, draft.duration) }); }} /></div>
             </fieldset>
-            <label className="priority-fee-field"><FieldLabel required>价格</FieldLabel><div><span aria-hidden="true">¥</span><input required aria-label="本次收费（元）" type="number" inputMode="decimal" min="0" value={draft.fee} onChange={(event) => onChange({ ...draft, fee: Number(event.target.value) })} /></div></label>
+            <label className="priority-fee-field"><FieldLabel required>本次报价</FieldLabel><div><span aria-hidden="true">¥</span><input required aria-label="本次报价（元）" type="number" inputMode="decimal" min="0" value={draft.fee} onChange={(event) => onChange({ ...draft, fee: Number(event.target.value) })} /></div></label>
           </div>
           {!isWeekly && <label className="lesson-date-field"><FieldLabel required>上课日期</FieldLabel><input required type="date" value={draft.date} onChange={(event) => onChange({ ...draft, date: event.target.value })} /></label>}
           {isWeekly && <>
@@ -1526,6 +1677,24 @@ function LessonEditor({ draft, students, isNew, onChange, onClose, onSave, onDel
             <label><FieldLabel>收款状态</FieldLabel><select value={draft.payment} onChange={(event) => onChange({ ...draft, payment: event.target.value as Payment })}><option>待收款</option><option>已收款</option></select></label>
           </div>
           {scheduleError && <p className="schedule-error" role="alert">{scheduleError}</p>}
+        </section>
+
+        <section className="form-section work-cost-section">
+          <div className="form-section-heading"><span><CircleDollarSign size={17} aria-hidden="true" /></span><div><strong>真实投入与成本</strong><small>自动带入学生默认值，本节课仍可单独调整</small></div></div>
+          <div className="form-grid two work-cost-grid">
+            <label><span>单程通勤（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.commuteMinutes || ''} onChange={(event) => onChange({ ...draft, commuteMinutes: Number(event.target.value) })} placeholder="0" /></label>
+            <label><span>往返通勤费用（元）</span><input type="number" inputMode="decimal" min="0" step="0.01" value={draft.commuteCost || ''} onChange={(event) => onChange({ ...draft, commuteCost: Number(event.target.value) })} placeholder="0" /></label>
+            <label><span>备课时间（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.preparationMinutes || ''} onChange={(event) => onChange({ ...draft, preparationMinutes: Number(event.target.value) })} placeholder="0" /></label>
+            <label><span>课后善后（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.wrapUpMinutes || ''} onChange={(event) => onChange({ ...draft, wrapUpMinutes: Number(event.target.value) })} placeholder="0" /></label>
+          </div>
+          <div className="effective-rate-preview" aria-live="polite">
+            <div><span>全部投入</span><strong>{Math.round(costBreakdown.workMinutes)} 分钟</strong></div>
+            <i aria-hidden="true" />
+            <div><span>扣通勤后</span><strong>{cnMoney.format(costBreakdown.netIncome)}</strong></div>
+            <i aria-hidden="true" />
+            <div className="highlight"><span>真实时薪</span><strong>{cnMoney.format(costBreakdown.effectiveHourly)}/h</strong></div>
+          </div>
+          <p className="cost-helper">通勤按往返计算；如果本节课线上进行，可将通勤时间和费用设为 0。</p>
         </section>
 
         <section className="form-section">
@@ -1590,21 +1759,73 @@ function ArchivePinDialog({ onClose, onUnlock }: { onClose: () => void; onUnlock
 }
 
 function StudentEditor({ draft, onChange, onClose, onSave }: { draft: Student; onChange: (student: Student) => void; onClose: () => void; onSave: () => void }) {
+  const startTime = draft.defaultStartTime || '16:00';
+  const endTime = draft.defaultEndTime || '17:30';
+  const duration = durationFromTimes(startTime, endTime, draft.defaultDuration || 90);
+  const hourlyRate = Math.max(0, studentHourlyRate(draft));
+  const quotedFee = hourlyRate * duration / 60;
+  const workMinutes = duration + Math.max(0, draft.commuteMinutes || 0) * 2 + Math.max(0, draft.preparationMinutes || 0) + Math.max(0, draft.wrapUpMinutes || 0);
+  const netIncome = quotedFee - Math.max(0, draft.commuteCost || 0);
+  const effectiveHourly = workMinutes ? netIncome / (workMinutes / 60) : 0;
+  const scheduleCount = draft.autoScheduleEnabled ? scheduledLessonsForStudent({ ...draft, defaultStartTime: startTime, defaultEndTime: endTime, defaultDuration: duration, defaultFee: quotedFee, defaultHourlyRate: hourlyRate }).length : 0;
+  const invalidTime = endTime <= startTime;
+  const missingWeekday = Boolean(draft.autoScheduleEnabled && !(draft.defaultWeekdays || []).length);
+  const invalidPeriod = Boolean(draft.tutoringStartDate && draft.tutoringEndDate && draft.tutoringEndDate < draft.tutoringStartDate);
+  const canSave = Boolean(draft.name.trim() && hourlyRate > 0 && !invalidTime && !missingWeekday && !invalidPeriod);
   return <div className="sheet-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="sheet compact-sheet" role="dialog" aria-modal="true" aria-labelledby="student-title"><div className="sheet-handle" /><header className="sheet-header"><div><p className="eyebrow">Student profile</p><h2 id="student-title">学生档案</h2></div><IconButton label="关闭" onClick={onClose}><X size={20} /></IconButton></header>
     <div className="sheet-content">
       <section className="form-section">
-        <div className="form-section-heading"><span><Users size={17} aria-hidden="true" /></span><div><strong>基本资料</strong><small>姓名、学校与默认课程设置</small></div></div>
+        <div className="form-section-heading"><span><Users size={17} aria-hidden="true" /></span><div><strong>基本资料</strong><small>姓名、学校与联系方式</small></div></div>
         <p className="required-legend"><b aria-hidden="true">*</b> 为必填项，其余档案可以之后补充</p>
-        <div className="form-grid two">
+        <div className="form-grid two student-basic-grid">
           <label><FieldLabel required>姓名</FieldLabel><input required value={draft.name} onChange={(event) => onChange({ ...draft, name: event.target.value })} placeholder="学生姓名" /></label>
           <label><span>昵称</span><input value={draft.nickname} onChange={(event) => onChange({ ...draft, nickname: event.target.value })} placeholder="日常称呼" /></label>
           <label><span>年级</span><input value={draft.grade} onChange={(event) => onChange({ ...draft, grade: event.target.value })} /></label>
           <label><span>学校</span><input value={draft.school} onChange={(event) => onChange({ ...draft, school: event.target.value })} /></label>
           <label><span>家长姓名</span><input value={draft.parentName} onChange={(event) => onChange({ ...draft, parentName: event.target.value })} /></label>
           <label><span>家长电话</span><input inputMode="tel" value={draft.parentPhone} onChange={(event) => onChange({ ...draft, parentPhone: event.target.value })} /></label>
-          <label><span>默认时长（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.defaultDuration} onChange={(event) => onChange({ ...draft, defaultDuration: Number(event.target.value) })} /></label>
-          <label><span>默认课费（元）</span><input type="number" inputMode="decimal" min="0" value={draft.defaultFee} onChange={(event) => onChange({ ...draft, defaultFee: Number(event.target.value) })} /></label>
         </div>
+      </section>
+      <section className="form-section student-pay-section">
+        <div className="form-section-heading"><span><CircleDollarSign size={17} aria-hidden="true" /></span><div><strong>常用上课与计薪</strong><small>上课时间和时薪优先；保存后可直接同步首页课表</small></div></div>
+        <div className="student-priority-grid">
+          <fieldset className="priority-time-field">
+            <legend><FieldLabel required>常用上课时间</FieldLabel></legend>
+            <div><input required aria-label="常用开始时间" type="time" value={startTime} onChange={(event) => {
+              const nextStart = event.target.value;
+              const nextDuration = durationFromTimes(nextStart, endTime, duration);
+              onChange({ ...draft, defaultStartTime: nextStart, defaultDuration: nextDuration, defaultFee: hourlyRate * nextDuration / 60 });
+            }} /><i aria-hidden="true">至</i><input required aria-label="常用结束时间" type="time" value={endTime} onChange={(event) => {
+              const nextEnd = event.target.value;
+              const nextDuration = durationFromTimes(startTime, nextEnd, duration);
+              onChange({ ...draft, defaultEndTime: nextEnd, defaultDuration: nextDuration, defaultFee: hourlyRate * nextDuration / 60 });
+            }} /></div>
+          </fieldset>
+          <label className="priority-hourly-field"><FieldLabel required>报价时薪</FieldLabel><div><span aria-hidden="true">¥</span><input required aria-label="报价时薪（元每小时）" type="number" inputMode="decimal" min="0" step="0.01" value={hourlyRate || ''} onChange={(event) => {
+            const rate = Number(event.target.value);
+            onChange({ ...draft, defaultHourlyRate: rate, defaultFee: rate * duration / 60 });
+          }} /></div></label>
+        </div>
+        <fieldset className="weekday-picker student-weekdays"><legend>常用上课日</legend><div>{weekDays.map((day, index) => {
+          const value = index + 1;
+          const selected = (draft.defaultWeekdays || []).includes(value);
+          return <button type="button" key={day} className={selected ? 'selected' : ''} aria-pressed={selected} onClick={() => onChange({ ...draft, defaultWeekdays: selected ? (draft.defaultWeekdays || []).filter((item) => item !== value) : [...(draft.defaultWeekdays || []), value].sort() })}><small>周</small>{day}<Check size={13} aria-hidden="true" /></button>;
+        })}</div></fieldset>
+        <button type="button" className={`auto-schedule-toggle ${draft.autoScheduleEnabled ? 'selected' : ''}`} aria-pressed={Boolean(draft.autoScheduleEnabled)} onClick={() => onChange({ ...draft, autoScheduleEnabled: !draft.autoScheduleEnabled })}>
+          <span><CalendarDays size={17} aria-hidden="true" /></span><div><strong>保存学生后同步到首页课表</strong><small>{draft.autoScheduleEnabled ? `预计生成 ${scheduleCount} 节预约课${draft.tutoringEndDate ? '' : '（先排未来 6 个月）'}` : '关闭时只保存学生资料，不自动排课'}</small></div><i aria-hidden="true"><b /></i>
+        </button>
+        <div className="form-grid two work-cost-grid student-cost-grid">
+          <label><span>单程通勤（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.commuteMinutes || ''} onChange={(event) => onChange({ ...draft, commuteMinutes: Number(event.target.value) })} placeholder="0" /></label>
+          <label><span>往返通勤费用（元）</span><input type="number" inputMode="decimal" min="0" step="0.01" value={draft.commuteCost || ''} onChange={(event) => onChange({ ...draft, commuteCost: Number(event.target.value) })} placeholder="0" /></label>
+          <label><span>每次备课（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.preparationMinutes || ''} onChange={(event) => onChange({ ...draft, preparationMinutes: Number(event.target.value) })} placeholder="0" /></label>
+          <label><span>每次善后（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.wrapUpMinutes || ''} onChange={(event) => onChange({ ...draft, wrapUpMinutes: Number(event.target.value) })} placeholder="0" /></label>
+        </div>
+        <div className="effective-rate-preview student-rate-preview" aria-live="polite">
+          <div><span>单次报价</span><strong>{cnMoney.format(quotedFee)}</strong></div><i aria-hidden="true" /><div><span>全部投入</span><strong>{workMinutes} 分钟</strong></div><i aria-hidden="true" /><div className="highlight"><span>真实时薪</span><strong>{cnMoney.format(effectiveHourly)}/h</strong></div>
+        </div>
+        <p className="cost-helper">真实时薪会扣除往返通勤费用，并计入往返通勤、备课和善后时间。</p>
+        {invalidTime && <p className="schedule-error" role="alert">结束时间需要晚于开始时间。</p>}
+        {missingWeekday && <p className="schedule-error" role="alert">要同步首页课表，请至少选择一个常用上课日。</p>}
       </section>
       <section className="form-section">
         <div className="form-section-heading"><span><CalendarRange size={17} aria-hidden="true" /></span><div><strong>授课状态与周期</strong><small>用于区分当前学生，并限制每周自动排课</small></div></div>
@@ -1617,12 +1838,12 @@ function StudentEditor({ draft, onChange, onClose, onSave }: { draft: Student; o
           <label><span>结课日期（可选）</span><input type="date" min={draft.tutoringStartDate || undefined} value={draft.tutoringEndDate || ''} onChange={(event) => onChange({ ...draft, tutoringEndDate: event.target.value, tutoringStatus: event.target.value && event.target.value < demoToday ? 'ended' : draft.tutoringStatus })} /></label>
         </div>
         <p className="tutoring-period-hint">每周重复课程只会生成在这个日期区间内；已结课学生不会被默认选入新的排课。</p>
+        {invalidPeriod && <p className="schedule-error" role="alert">结课日期不能早于开始授课日期。</p>}
       </section>
       <section className="form-section">
         <div className="form-section-heading"><span><MapPin size={17} aria-hidden="true" /></span><div><strong>上课地点</strong><small>课表只显示简称，详细地址留在档案内</small></div></div>
-        <div className="form-grid two">
+        <div className="form-grid">
           <label><span>课表地点简称</span><input maxLength={10} value={draft.locationShort || ''} onChange={(event) => onChange({ ...draft, locationShort: event.target.value })} placeholder="如：徐家汇、学生家" /></label>
-          <label><span>单程通勤（分钟）</span><input type="number" inputMode="numeric" min="0" value={draft.commuteMinutes || ''} onChange={(event) => onChange({ ...draft, commuteMinutes: Number(event.target.value) })} placeholder="预计时间" /></label>
         </div>
         <label className="field"><span>详细地址</span><textarea value={draft.fullAddress || ''} onChange={(event) => onChange({ ...draft, fullAddress: event.target.value })} placeholder="仅在学生资料中展示，不显示在课表上" /></label>
       </section>
@@ -1633,6 +1854,6 @@ function StudentEditor({ draft, onChange, onClose, onSave }: { draft: Student; o
         <label className="field"><span>教学提醒</span><textarea value={draft.notes} onChange={(event) => onChange({ ...draft, notes: event.target.value })} placeholder="长期关注点、学习习惯…" /></label>
       </section>
     </div>
-    <footer className="sheet-footer"><button className="secondary-button grow" onClick={onClose}>取消</button><button className="primary-button grow" onClick={onSave}><Check size={18} />保存学生</button></footer>
+    <footer className="sheet-footer"><button className="secondary-button grow" onClick={onClose}>取消</button><button className="primary-button grow" onClick={onSave} disabled={!canSave}><Check size={18} />保存学生</button></footer>
   </section></div>;
 }

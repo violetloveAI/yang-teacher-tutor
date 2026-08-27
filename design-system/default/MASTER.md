@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** 杨老师家教
+**Project:** 家教计薪器
 **Generated:** 2026-08-26 23:17:28
 **Category:** Productivity Tool
 **Design Dials:** Variance 4/10 (Balanced / Modern) | Motion 5/10 (Standard) | Density 7/10 (Standard)
